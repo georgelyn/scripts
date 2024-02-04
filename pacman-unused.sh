@@ -16,8 +16,9 @@ function print_help() {
 	printf '%s\n' "[a]: Show all"
 	printf '%s\n' "[i]: Info about the package"
 	printf '%s\n' "[r]: Remove package with other unused dependencies"
+	printf '%s\n' "[e]: Change the installation reason to explicitly installed"
 	printf '%s\n' "[h]: Show help"
-	printf '%s\n' "[q / e]: Exit"
+	printf '%s\n' "[q]: Exit"
 	printf '%s\n' "(default) Next (Ignore current package)"
 	printf '%s\n'
 }
@@ -33,6 +34,9 @@ function show_options() {
 		print_pkg_info #"$1"
 		print_current_pkg
 		show_options
+	elif [ "$input" == "e" ]; then
+		set_as_explicit
+		show_options
 	elif [ "$input" == "r" ]; then
 		printf $(remove_pkg)
 		printf '%s\n'
@@ -40,7 +44,7 @@ function show_options() {
 		print_help
 		print_current_pkg
 		show_options
-	elif [[ "$input" == "e" || "$input" == "q" ]]; then
+	elif [ "$input" == "q" ]; then
 		exit 0
 	fi
 }
@@ -55,6 +59,10 @@ function remove_pkg() {
 	{ set -x; } &> /dev/null #echo on
 	echo "$(sudo pacman -Runs $pkg)"
 	{ set +x; } &> /dev/null #echo off
+}
+
+function set_as_explicit() {
+	echo "$(sudo pacman -D --asexplicit $pkg)"
 }
 
 function print_all() {
